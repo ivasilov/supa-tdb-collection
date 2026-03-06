@@ -4,19 +4,13 @@ A [TanStack/db](https://tanstack.com/db/latest) collection backed by [Supabase](
 
 ## Quick test
 
-1. Create a Next.js app with shadcn:
-
-```bash
-npx shadcn@latest init
-```
-
-2. Go to the block installer:
+1. Go to the block installer:
 
    <https://ui-library-git-feat-tanstack-db-gen-supabase.vercel.app/ui/docs/nextjs/tanstack-db>
 
 3. Enter your Supabase project URL and anon key (from an existing **production** project)
 
-4. Use the generated shadcn URL in your local project
+4. Use the generated shadcn URL in your local project (it works even if you don't have a shadcn-initialized project)
 
 4. Drop it into your Next.js app and run it.
 
