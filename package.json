@@ -1,9 +1,9 @@
 {
-  "name": "supabase-collection",
+  "name": "supa-tdb-collection",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A library for creating a Supabase collection.",
-  "author": "John Doe <john.doe@mail.com>",
+  "author": "Ivan Vasilov",
   "license": "MIT",
   "exports": {
     ".": "./dist/index.mjs",
@@ -37,5 +37,16 @@
     "tsdown": "^0.18.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivasilov/supabase-collection.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ivasilov/supabase-collection/issues"
+  },
+  "homepage": "https://github.com/ivasilov/supabase-collection#readme"
 }
