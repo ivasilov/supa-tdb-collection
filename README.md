@@ -8,9 +8,9 @@ A [TanStack/db](https://tanstack.com/db/latest) collection backed by [Supabase](
 
    <https://ui-library-git-feat-tanstack-db-gen-supabase.vercel.app/ui/docs/nextjs/tanstack-db>
 
-3. Enter your Supabase project URL and anon key (from an existing **production** project)
+2. Enter your Supabase project URL and anon key (from an existing **production** project)
 
-4. Use the generated shadcn URL in your local project (it works even if you don't have a shadcn-initialized project)
+3. Use the generated shadcn URL in your local project (it works even if you don't have a shadcn-initialized project)
 
 4. Drop it into your Next.js app and run it.
 
@@ -37,7 +37,7 @@ const todos = collection(
     where: (query, item) => query.eq("id", item.id),
     supabase,
     realtime: true,
-  })
+  }),
 );
 ```
 
@@ -93,3 +93,32 @@ todos.delete(todo);
 ```
 
 Mutations are **optimistic** — the local collection updates immediately and syncs to Supabase in the background. If the server rejects a change it rolls back automatically.
+
+### What gets pushed to PostgREST
+
+| Feature                                              | Server-side | Notes                                                                                          |
+| ---------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `FROM`                                               | Yes         | Maps to PostgREST table endpoint                                                               |
+| `WHERE` (eq, gt, gte, lt, lte, inArray, not, isNull) | Yes         | Translated to PostgREST syntax                                                                 |
+| `AND` (multiple conditions / chained `.where`)       | Yes         | Translated to PostgREST syntax                                                                 |
+| `ORDER BY` (on source columns)                       | Yes         | Translated to PostgREST syntax                                                                 |
+| `LIMIT`                                              | Yes         | Translated to PostgREST syntax                                                                 |
+| `JOIN`                                               | Yes         | Each table is fetched separately; the join key is pushed as an `in` filter on the second query |
+
+### What runs client-side
+
+These operations always fetch the full table (`select=*`) and are evaluated in-memory:
+
+- `SELECT` column subsets, renaming, and computed fields (`upper`, `lower`, `concat`, `length`, `add`, `coalesce`)
+- Aggregate functions: `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`
+- `GROUP BY` and `HAVING`
+- `DISTINCT`
+- `ORDER BY` on computed fields
+
+### Limitations and future development
+
+- All columns are fetched for every row — specific column selection can't be pushed to PostgREST
+- Client-side operations (`GROUP BY`, `DISTINCT`, aggregates, `HAVING`, computed `SELECT`) fetches the entire table, which can be expensive on large datasets. Can be optimized to push down filters when the query uses `WHERE`.
+- `OR` conditions and nested `AND`/`OR` are not yet supported by this library (but doable)
+- `OFFSET` is not yet supported (pagination must use `LIMIT` only for now), bug in Tanstack DB
+- `findOne` fetches the whole table, doesn't use `LIMIT=1`, bug in Tanstack DB
