@@ -1,352 +1,347 @@
 import {
+  add,
+  and,
+  avg,
+  coalesce,
+  concat,
+  count,
   eq,
   gt,
   gte,
-  lt,
-  lte,
-  and,
-  or,
-  not,
   inArray,
   isNull,
   isUndefined,
-  count,
-  sum,
-  avg,
-  min,
-  max,
-  upper,
-  lower,
-  concat,
   length,
-  add,
-  coalesce,
-} from "@tanstack/react-db";
-import { afterEach, beforeEach, describe, test } from "vitest";
+  lower,
+  lt,
+  lte,
+  max,
+  min,
+  not,
+  or,
+  sum,
+  upper,
+} from "@tanstack/react-db"
+import { afterEach, beforeEach, describe, test } from "vitest"
 import {
-  createMockFetch,
+  createMockedTodosCollection,
   createMockedUsersCollection,
   createMockedUsersTodosCollection,
-  createMockedTodosCollection,
-  queryResult,
+  createMockFetch,
   expectFetchUrls,
-} from "./test.utils";
+  queryResult,
+} from "./test.utils"
 
 describe("PostgREST query generation", () => {
-  let mockFetch: ReturnType<typeof createMockFetch>;
-  let usersCollection: ReturnType<typeof createMockedUsersCollection>;
-  let utCollection: ReturnType<typeof createMockedUsersTodosCollection>;
-  let todosCollection: ReturnType<typeof createMockedTodosCollection>;
+  let mockFetch: ReturnType<typeof createMockFetch>
+  let usersCollection: ReturnType<typeof createMockedUsersCollection>
+  let utCollection: ReturnType<typeof createMockedUsersTodosCollection>
+  let todosCollection: ReturnType<typeof createMockedTodosCollection>
 
   beforeEach(() => {
-    mockFetch = createMockFetch();
-    usersCollection = createMockedUsersCollection(mockFetch);
-    utCollection = createMockedUsersTodosCollection(mockFetch);
-    todosCollection = createMockedTodosCollection(mockFetch);
-  });
+    mockFetch = createMockFetch()
+    usersCollection = createMockedUsersCollection(mockFetch)
+    utCollection = createMockedUsersTodosCollection(mockFetch)
+    todosCollection = createMockedTodosCollection(mockFetch)
+  })
 
   afterEach(() => {
-    usersCollection?.cleanup();
-    utCollection?.cleanup();
-    todosCollection?.cleanup();
-  });
+    usersCollection?.cleanup()
+    utCollection?.cleanup()
+    todosCollection?.cleanup()
+  })
 
   describe("FROM", () => {
     test("SELECT * FROM users", async () => {
-      await queryResult((q) => q.from({ user: usersCollection }));
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+      await queryResult((q) => q.from({ user: usersCollection }))
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("WHERE", () => {
     test("WHERE active = true", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => eq(user.active, true)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&active=eq.true"]);
-    });
+          .where(({ user }) => eq(user.active, true))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&active=eq.true"])
+    })
 
     test("WHERE id = 1", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).where(({ user }) => eq(user.id, 1)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => eq(user.id, 1))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1"])
+    })
 
     test("WHERE name = 'John'", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => eq(user.name, "John")),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&name=eq.John"]);
-    });
+          .where(({ user }) => eq(user.name, "John"))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&name=eq.John"])
+    })
 
     test("WHERE id > 5 (gt)", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).where(({ user }) => gt(user.id, 5)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=gt.5"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => gt(user.id, 5))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=gt.5"])
+    })
 
     test("WHERE id >= 5 (gte)", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).where(({ user }) => gte(user.id, 5)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=gte.5"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => gte(user.id, 5))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=gte.5"])
+    })
 
     test("WHERE id < 10 (lt)", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).where(({ user }) => lt(user.id, 10)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=lt.10"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => lt(user.id, 10))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=lt.10"])
+    })
 
     test("WHERE id <= 10 (lte)", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).where(({ user }) => lte(user.id, 10)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=lte.10"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => lte(user.id, 10))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=lte.10"])
+    })
 
     test("WHERE id IN (1, 2, 3)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => inArray(user.id, [1, 2, 3])),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=in.(1,2,3)"]);
-    });
+          .where(({ user }) => inArray(user.id, [1, 2, 3]))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=in.(1,2,3)"])
+    })
 
     test("WHERE NOT(active = false)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => not(eq(user.active, false))),
-      );
+          .where(({ user }) => not(eq(user.active, false)))
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=not.eq.false",
-      ]);
-    });
+      ])
+    })
 
     test("WHERE name IS NULL", async () => {
       await queryResult((q) =>
-        q
-          .from({ user: usersCollection })
-          .where(({ user }) => isNull(user.name)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&name=is.null"]);
-    });
+        q.from({ user: usersCollection }).where(({ user }) => isNull(user.name))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&name=is.null"])
+    })
 
     test("AND: active = true AND id > 5", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => and(eq(user.active, true), gt(user.id, 5))),
-      );
+          .where(({ user }) => and(eq(user.active, true), gt(user.id, 5)))
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=eq.true&id=gt.5",
-      ]);
-    });
+      ])
+    })
 
     test("chained .where", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .where(({ user }) => eq(user.active, true))
-          .where(({ user }) => gt(user.id, 5)),
-      );
+          .where(({ user }) => gt(user.id, 5))
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=eq.true&id=gt.5",
-      ]);
-    });
+      ])
+    })
 
     test.todo("OR: active = true OR id = 1", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .where(({ user }) => or(eq(user.active, true), eq(user.id, 1))),
-      );
+          .where(({ user }) => or(eq(user.active, true), eq(user.id, 1)))
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=eq.true&id=eq.1",
-      ]);
-    });
+      ])
+    })
 
-    test.todo(
-      "nested AND/OR: active = true AND (id > 5 OR name = 'admin')",
-      async () => {
-        await queryResult((q) =>
-          q
-            .from({ user: usersCollection })
-            .where(({ user }) =>
-              and(
-                eq(user.active, true),
-                or(gt(user.id, 5), eq(user.name, "admin")),
-              ),
-            ),
-        );
-      },
-    );
-  });
+    test.todo("nested AND/OR: active = true AND (id > 5 OR name = 'admin')", async () => {
+      await queryResult((q) =>
+        q
+          .from({ user: usersCollection })
+          .where(({ user }) =>
+            and(
+              eq(user.active, true),
+              or(gt(user.id, 5), eq(user.name, "admin"))
+            )
+          )
+      )
+    })
+  })
 
   describe("SELECT columns (client-side)", () => {
     test("subset of fields", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ id: user.id, name: user.name })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ id: user.id, name: user.name }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("field renaming", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ userId: user.id, fullName: user.name })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ userId: user.id, fullName: user.name }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("computed boolean with eq", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           isActive: eq(user.active, true),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("upper(name)", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           upperName: upper(user.name),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("lower(email)", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           lowerEmail: lower(user.email),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("concat(name, ' ', email)", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           nameAndEmail: concat(user.name, " ", user.email),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("length(name)", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           nameLength: length(user.name),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("add(id, 1)", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           idPlusOne: add(user.id, 1),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("coalesce(name, 'Unknown')", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
           displayName: coalesce(user.name, "Unknown"),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("spread + computed field", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           ...user,
           highId: gt(user.id, 5),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("Aggregate functions (client-side)", () => {
     test("count(id)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ totalUsers: count(user.id) })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ totalUsers: count(user.id) }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("sum(id)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ sumId: sum(user.id) })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ sumId: sum(user.id) }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("avg(id)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ avgId: avg(user.id) })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ avgId: avg(user.id) }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("min(id)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ minId: min(user.id) })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ minId: min(user.id) }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("max(id)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .select(({ user }) => ({ maxId: max(user.id) })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .select(({ user }) => ({ maxId: max(user.id) }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("multiple aggregates", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           totalUsers: count(user.id),
           maxId: max(user.id),
-        })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("order by $selected/computed field", async () => {
       await queryResult((q) =>
@@ -357,28 +352,28 @@ describe("PostgREST query generation", () => {
             name: user.name,
             nameLength: length(user.name),
           }))
-          .orderBy(({ $selected }) => $selected.nameLength, "desc"),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+          .orderBy(({ $selected }) => $selected.nameLength, "desc")
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("GROUP BY (client-side)", () => {
     test("single column groupBy", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).groupBy(({ user }) => user.active),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+        q.from({ user: usersCollection }).groupBy(({ user }) => user.active)
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("multiple columns groupBy", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .groupBy(({ user }) => [user.active, user.name]),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .groupBy(({ user }) => [user.active, user.name])
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("groupBy + aggregates", async () => {
       await queryResult((q) =>
@@ -388,11 +383,11 @@ describe("PostgREST query generation", () => {
           .select(({ user }) => ({
             active: user.active,
             userCount: count(user.id),
-          })),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+          }))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("HAVING (client-side)", () => {
     test("having with direct aggregate", async () => {
@@ -404,10 +399,10 @@ describe("PostgREST query generation", () => {
             active: user.active,
             totalId: sum(user.id),
           }))
-          .having(({ user }) => gt(sum(user.id), 10)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .having(({ user }) => gt(sum(user.id), 10))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("having with $selected fields", async () => {
       await queryResult((q) =>
@@ -418,50 +413,50 @@ describe("PostgREST query generation", () => {
             active: user.active,
             totalCount: count(user.id),
           }))
-          .having(({ $selected }) => gt($selected.totalCount, 5)),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+          .having(({ $selected }) => gt($selected.totalCount, 5))
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("ORDER BY", () => {
     test("default (asc)", async () => {
       await queryResult((q) =>
-        q.from({ user: usersCollection }).orderBy(({ user }) => user.name),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.asc"]);
-    });
+        q.from({ user: usersCollection }).orderBy(({ user }) => user.name)
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.asc"])
+    })
 
     test("explicit asc", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .orderBy(({ user }) => user.name, "asc"),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.asc"]);
-    });
+          .orderBy(({ user }) => user.name, "asc")
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.asc"])
+    })
 
     test("descending", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .orderBy(({ user }) => user.name, "desc"),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.desc"]);
-    });
+          .orderBy(({ user }) => user.name, "desc")
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&order=name.desc"])
+    })
 
     test("multi-column orderBy", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .orderBy(({ user }) => user.name, "asc")
-          .orderBy(({ user }) => user.id, "desc"),
-      );
+          .orderBy(({ user }) => user.id, "desc")
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&order=name.asc,id.desc",
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe("LIMIT", () => {
     test("basic limit", async () => {
@@ -469,13 +464,13 @@ describe("PostgREST query generation", () => {
         q
           .from({ user: usersCollection })
           .orderBy(({ user }) => user.id)
-          .limit(10),
-      );
+          .limit(10)
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&order=id.asc&limit=10",
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe("LIMIT + OFFSET", () => {
     test.todo("pagination (page 2)", async () => {
@@ -484,25 +479,25 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .orderBy(({ user }) => user.id)
           .limit(20)
-          .offset(20),
-      );
+          .offset(20)
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&order=id.asc&limit=20&offset=20",
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe("Subquery in FROM", () => {
     test("filtered query as source pushes filter down", async () => {
       await queryResult((q) => {
         const activeUsers = q
           .from({ user: usersCollection })
-          .where(({ user }) => eq(user.active, true));
-        return q.from({ activeUser: activeUsers });
-      });
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&active=eq.true"]);
-    });
-  });
+          .where(({ user }) => eq(user.active, true))
+        return q.from({ activeUser: activeUsers })
+      })
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&active=eq.true"])
+    })
+  })
 
   describe("findOne", () => {
     test.todo("findOne with where pushes filter and limit", async () => {
@@ -511,11 +506,11 @@ describe("PostgREST query generation", () => {
         q
           .from({ user: usersCollection })
           .where(({ user }) => eq(user.id, 1))
-          .findOne(),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1"]);
-    });
-  });
+          .findOne()
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1"])
+    })
+  })
 
   describe("DISTINCT (client-side)", () => {
     test("single column distinct", async () => {
@@ -523,20 +518,20 @@ describe("PostgREST query generation", () => {
         q
           .from({ user: usersCollection })
           .select(({ user }) => ({ name: user.name }))
-          .distinct(),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .distinct()
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("multi column distinct", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .select(({ user }) => ({ name: user.name, active: user.active }))
-          .distinct(),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
+          .distinct()
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
 
     test("distinct with where clause", async () => {
       await queryResult((q) =>
@@ -544,11 +539,11 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .where(({ user }) => eq(user.active, true))
           .select(({ user }) => ({ name: user.name }))
-          .distinct(),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+          .distinct()
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("Combined queries", () => {
     test("WHERE + ORDER BY + LIMIT", async () => {
@@ -557,24 +552,24 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .where(({ user }) => eq(user.active, true))
           .orderBy(({ user }) => user.name, "asc")
-          .limit(10),
-      );
+          .limit(10)
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=eq.true&order=name.asc&limit=10",
-      ]);
-    });
+      ])
+    })
 
     test("WHERE + ORDER BY", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .where(({ user }) => eq(user.active, true))
-          .orderBy(({ user }) => user.name, "desc"),
-      );
+          .orderBy(({ user }) => user.name, "desc")
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&active=eq.true&order=name.desc",
-      ]);
-    });
+      ])
+    })
 
     test("WHERE + ORDER BY + LIMIT", async () => {
       await queryResult((q) =>
@@ -582,12 +577,12 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .where(({ user }) => gt(user.id, 3))
           .orderBy(({ user }) => user.id)
-          .limit(5),
-      );
+          .limit(5)
+      )
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*&id=gt.3&order=id.asc&limit=5",
-      ]);
-    });
+      ])
+    })
 
     test("GROUP BY + HAVING + ORDER BY($selected) + LIMIT (client-side)", async () => {
       await queryResult((q) =>
@@ -601,27 +596,25 @@ describe("PostgREST query generation", () => {
           }))
           .having(({ $selected }) => gt($selected.userCount, 0))
           .orderBy(({ $selected }) => $selected.userCount, "desc")
-          .limit(10),
-      );
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"]);
-    });
-  });
+          .limit(10)
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+    })
+  })
 
   describe("JOIN", () => {
     test.only("basic inner join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .join({ ut: utCollection }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
-          ),
-      );
+          .join({ ut: utCollection }, ({ user, ut }) => eq(user.id, ut.user_id))
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
-      ]);
-    });
+      ])
+    })
 
     test("explicit inner join", async () => {
       await queryResult((q) =>
@@ -630,60 +623,60 @@ describe("PostgREST query generation", () => {
           .join(
             { ut: utCollection },
             ({ user, ut }) => eq(user.id, ut.user_id),
-            "inner",
-          ),
-      );
+            "inner"
+          )
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users_todos?select=*",
         "/rest/v1/users?id=in.(1)&select=*",
-      ]);
-    });
+      ])
+    })
 
     test("left join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .leftJoin({ ut: utCollection }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
-          ),
-      );
+            eq(user.id, ut.user_id)
+          )
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
-      ]);
-    });
+      ])
+    })
 
     test("right join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .rightJoin({ ut: utCollection }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
-          ),
-      );
+            eq(user.id, ut.user_id)
+          )
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users_todos?select=*",
         "/rest/v1/users?id=in.(1)&select=*",
-      ]);
-    });
+      ])
+    })
 
     test("full join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .fullJoin({ ut: utCollection }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
-          ),
-      );
+            eq(user.id, ut.user_id)
+          )
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*",
-      ]);
-    });
+      ])
+    })
 
     test("two chained joins (users -> users_todos -> todos)", async () => {
       await queryResult((q) =>
@@ -691,17 +684,17 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .join({ ut: utCollection }, ({ user, ut }) => eq(user.id, ut.user_id))
           .join({ todo: todosCollection }, ({ ut, todo }) =>
-            eq(ut?.todo_id, todo.id),
-          ),
-      );
+            eq(ut?.todo_id, todo.id)
+          )
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
         "/rest/v1/todos?id=in.(undefined)&select=*",
         "/rest/v1/todos?id=in.(1,undefined)&select=*",
-      ]);
-    });
+      ])
+    })
 
     test("JOIN + WHERE + SELECT", async () => {
       const data = await queryResult((q) =>
@@ -709,55 +702,55 @@ describe("PostgREST query generation", () => {
           .from({ user: usersCollection })
           .join({ ut: utCollection }, ({ user, ut }) => eq(user.id, ut.user_id))
           .join({ todo: todosCollection }, ({ ut, todo }) =>
-            eq(ut?.todo_id, todo.id),
+            eq(ut?.todo_id, todo.id)
           )
           .where(({ todo }) => eq(todo?.completed, false))
           .select(({ user, todo }) => ({
             userName: user.name,
             todoTitle: todo?.title,
-          })),
-      );
+          }))
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
         "/rest/v1/todos?id=in.(undefined)&select=*",
         "/rest/v1/todos?id=in.(1,undefined)&select=*",
-      ]);
-    });
+      ])
+    })
 
     test("filtered subquery as join target", async () => {
       await queryResult((q) => {
         const activeUserTodos = q
           .from({ ut: utCollection })
-          .where(({ ut }) => gt(ut.todo_id, 0));
+          .where(({ ut }) => gt(ut.todo_id, 0))
         return q
           .from({ user: usersCollection })
           .join({ ut: activeUserTodos }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
-          );
-      });
+            eq(user.id, ut.user_id)
+          )
+      })
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&todo_id=gt.0&user_id=in.(1)",
-      ]);
-    });
+      ])
+    })
 
     test("deduplicated subquery used in multiple joins", async () => {
       await queryResult((q) => {
-        const userTodos = q.from({ ut: utCollection });
+        const userTodos = q.from({ ut: utCollection })
         return q
           .from({ user: usersCollection })
           .join({ ut: userTodos }, ({ user, ut }) => eq(user.id, ut.user_id))
-          .join({ ut: userTodos }, ({ user, ut }) => eq(user.id, ut?.user_id));
-      });
+          .join({ ut: userTodos }, ({ user, ut }) => eq(user.id, ut?.user_id))
+      })
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
-      ]);
-    });
+      ])
+    })
 
     test("subquery with groupBy + aggregates joined to another query", async () => {
       await queryResult((q) => {
@@ -767,39 +760,39 @@ describe("PostgREST query generation", () => {
           .select(({ ut }) => ({
             user_id: ut.user_id,
             todoCount: count(ut.todo_id),
-          }));
+          }))
         return q
           .from({ user: usersCollection })
           .join({ stats: todoCountsByUser }, ({ user, stats }) =>
-            eq(user.id, stats.user_id),
+            eq(user.id, stats.user_id)
           )
           .select(({ user, stats }) => ({
             userName: user.name,
             todoCount: stats?.todoCount,
-          }));
-      });
+          }))
+      })
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
-      ]);
-    });
+      ])
+    })
 
     test("find unmatched rows in left join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .leftJoin({ ut: utCollection }, ({ user, ut }) =>
-            eq(user.id, ut.user_id),
+            eq(user.id, ut.user_id)
           )
-          .where(({ ut }) => isUndefined(ut)),
-      );
+          .where(({ ut }) => isUndefined(ut))
+      )
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(1)",
-      ]);
-    });
-  });
-});
+      ])
+    })
+  })
+})

@@ -1,11 +1,11 @@
+import { createClient } from "@supabase/supabase-js"
 import {
   createCollection,
   liveQueryCollectionOptions,
-} from "@tanstack/react-db";
-import { supabaseCollectionOptions } from "../src/db";
-import { createClient } from "@supabase/supabase-js";
-import { expect, vi } from "vitest";
-import { z } from "zod";
+} from "@tanstack/react-db"
+import { expect, vi } from "vitest"
+import { z } from "zod"
+import { supabaseCollectionOptions } from "../src/db"
 
 // --- Schemas ---
 
@@ -14,24 +14,24 @@ export const usersSchema = z.object({
   name: z.string(),
   email: z.string(),
   active: z.boolean(),
-});
+})
 
 export const usersTodosSchema = z.object({
   user_id: z.number(),
   todo_id: z.number(),
-});
+})
 
 export const todosSchema = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(),
   completed: z.boolean(),
-});
+})
 
 // --- Mock infrastructure ---
 
-export const SUPABASE_URL = "http://localhost:54321";
-export const SUPABASE_KEY = "test-key";
+export const SUPABASE_URL = "http://localhost:54321"
+export const SUPABASE_KEY = "test-key"
 
 export const mockResponses: Record<string, any[]> = {
   users: [{ id: 1, name: "Alice", email: "alice@test.com", active: true }],
@@ -44,20 +44,20 @@ export const mockResponses: Record<string, any[]> = {
       completed: false,
     },
   ],
-};
+}
 
 export function createMockFetch() {
   return vi.fn<typeof fetch>().mockImplementation((input) => {
-    const url = new URL(typeof input === "string" ? input : input.toString());
-    const table = url.pathname.replace("/rest/v1/", "");
-    const response = mockResponses[table] ?? [];
+    const url = new URL(typeof input === "string" ? input : input.toString())
+    const table = url.pathname.replace("/rest/v1/", "")
+    const response = mockResponses[table] ?? []
     return Promise.resolve(
       new Response(JSON.stringify(response), {
         status: 200,
         headers: { "content-type": "application/json" },
-      }),
-    );
-  });
+      })
+    )
+  })
 }
 
 export function createMockedUsersCollection(mockFetch: typeof fetch) {
@@ -70,8 +70,8 @@ export function createMockedUsersCollection(mockFetch: typeof fetch) {
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },
       }),
-    }),
-  );
+    })
+  )
 }
 
 export function createMockedUsersTodosCollection(mockFetch: typeof fetch) {
@@ -85,8 +85,8 @@ export function createMockedUsersTodosCollection(mockFetch: typeof fetch) {
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },
       }),
-    }),
-  );
+    })
+  )
 }
 
 export function createMockedTodosCollection(mockFetch: typeof fetch) {
@@ -99,39 +99,39 @@ export function createMockedTodosCollection(mockFetch: typeof fetch) {
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },
       }),
-    }),
-  );
+    })
+  )
 }
 
 // --- Query helpers ---
 
 export async function queryResult(
-  queryFn: Parameters<typeof liveQueryCollectionOptions>[0]["query"],
+  queryFn: Parameters<typeof liveQueryCollectionOptions>[0]["query"]
 ) {
   const collection = createCollection(
-    liveQueryCollectionOptions({ query: queryFn }),
-  );
-  await collection.preload();
-  const data = await collection.toArrayWhenReady();
-  collection.cleanup();
-  return data;
+    liveQueryCollectionOptions({ query: queryFn })
+  )
+  await collection.preload()
+  const data = await collection.toArrayWhenReady()
+  collection.cleanup()
+  return data
 }
 
 // --- Assertion helpers ---
 
 export function normalizeFetchUrl(raw: string | URL | Request): string {
-  const url = new URL(typeof raw === "string" ? raw : raw.toString());
-  url.searchParams.sort();
-  return `${url.pathname}${decodeURIComponent(url.search)}`;
+  const url = new URL(typeof raw === "string" ? raw : raw.toString())
+  url.searchParams.sort()
+  return `${url.pathname}${decodeURIComponent(url.search)}`
 }
 
 export function expectFetchUrls(
   mockFetch: ReturnType<typeof createMockFetch>,
-  expectedPaths: string[],
+  expectedPaths: string[]
 ) {
-  const actual = mockFetch.mock.calls.map(([url]) => normalizeFetchUrl(url));
+  const actual = mockFetch.mock.calls.map(([url]) => normalizeFetchUrl(url))
   const expected = expectedPaths.map((p) =>
-    normalizeFetchUrl(new URL(p, SUPABASE_URL)),
-  );
-  expect([...expected]).toEqual([...actual]);
+    normalizeFetchUrl(new URL(p, SUPABASE_URL))
+  )
+  expect([...expected]).toEqual([...actual])
 }

@@ -11,5 +11,15 @@
     "formatter": {
       "semicolons": "asNeeded"
     }
+  },
+  "linter": {
+    "rules": {
+      // disable the rules for now, as they are too noisy and we want to focus on the formatting first
+      "performance": "off",
+      "suspicious": "off",
+      "correctness": "off",
+      "style": "off",
+      "complexity": "off"
+    }
   }
 }
