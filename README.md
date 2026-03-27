@@ -118,7 +118,8 @@ These operations always fetch the full table (`select=*`) and are evaluated in-m
 ### Limitations and future development
 
 - All columns are fetched for every row — specific column selection can't be pushed to PostgREST
-- Client-side operations (`GROUP BY`, `DISTINCT`, aggregates, `HAVING`, computed `SELECT`) fetches the entire table, which can be expensive on large datasets. Can be optimized to push down filters when the query uses `WHERE`.
+- Client-side operations (`GROUP BY`, aggregates, computed `SELECT`) fetches the all rows needed for the operation, which can be expensive on large datasets. When the query uses `WHERE`, it fetches only the filtered rows.
+  - even if there's query-pushdown for these operations, it would be limited to a single collection - can't be done across joins.
 - `OR` conditions and nested `AND`/`OR` are not yet supported by this library (but doable)
 - `OFFSET` is not yet supported (pagination must use `LIMIT` only for now), bug in Tanstack DB
 - `findOne` fetches the whole table, doesn't use `LIMIT=1`, bug in Tanstack DB

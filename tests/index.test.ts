@@ -366,7 +366,17 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
     })
 
-    test("multiple columns groupBy", async () => {
+    test("single column GROUP BY with WHERE", async () => {
+      await queryResult((q) =>
+        q
+          .from({ user: usersCollection })
+          .where(({ user }) => eq(user.active, true))
+          .groupBy(({ user }) => user.active)
+      )
+      expectFetchUrls(mockFetch, ["/rest/v1/users?active=eq.true&select=*"])
+    })
+
+    test("multiple columns GROUP BY", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -375,22 +385,23 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
     })
 
-    test("groupBy + aggregates", async () => {
+    test("GROUP BY + aggregates", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
+          .where(({ user }) => eq(user.active, true))
           .groupBy(({ user }) => user.active)
           .select(({ user }) => ({
             active: user.active,
             userCount: count(user.id),
           }))
       )
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+      expectFetchUrls(mockFetch, ["/rest/v1/users?active=eq.true&select=*"])
     })
   })
 
   describe("HAVING (client-side)", () => {
-    test("having with direct aggregate", async () => {
+    test("HAVING with direct aggregate", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -404,7 +415,7 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
     })
 
-    test("having with $selected fields", async () => {
+    test("HAVING with $selected fields", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -508,7 +519,7 @@ describe("PostgREST query generation", () => {
           .where(({ user }) => eq(user.id, 1))
           .findOne()
       )
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1"])
+      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&id=eq.1&limit=1"])
     })
   })
 
@@ -541,7 +552,7 @@ describe("PostgREST query generation", () => {
           .select(({ user }) => ({ name: user.name }))
           .distinct()
       )
-      expectFetchUrls(mockFetch, ["/rest/v1/users?select=*"])
+      expectFetchUrls(mockFetch, ["/rest/v1/users?active=eq.true&select=*"])
     })
   })
 
@@ -603,7 +614,7 @@ describe("PostgREST query generation", () => {
   })
 
   describe("JOIN", () => {
-    test.only("basic inner join", async () => {
+    test("basic inner join", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -697,7 +708,7 @@ describe("PostgREST query generation", () => {
     })
 
     test("JOIN + WHERE + SELECT", async () => {
-      const data = await queryResult((q) =>
+      await queryResult((q) =>
         q
           .from({ user: usersCollection })
           .join({ ut: utCollection }, ({ user, ut }) => eq(user.id, ut.user_id))
