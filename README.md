@@ -20,16 +20,15 @@ A [TanStack/db](https://tanstack.com/db/latest) collection backed by [Supabase](
 
 TanStack/db gives you **local-first, reactive collections** that sync with a backend. You query them with plain JavaScript — no hooks or selectors needed — and every component that reads the data re-renders automatically when it changes.
 
-### Defining a collection (is handled by the shadcn block)
+### Defining a collection 
 
 ```ts
-import { collection } from "@tanstack/db";
-import { supabaseCollectionOptions } from "supabase-collection";
+import { createCollection, supabaseCollectionOptions } from "supa-tdb-collection";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const todos = collection(
+const todos = createCollection(
   supabaseCollectionOptions({
     tableName: "todos",
     schema: todoSchema, // any Standard Schema (zod, valibot, …)
@@ -44,17 +43,19 @@ const todos = collection(
 ### Select
 
 ```ts
-import { useQuery } from "@tanstack/react-db";
+import { useLiveQuery, eq } from "supa-tdb-collection";
 
 // all rows
-const allTodos = useQuery(todos);
+const allTodos = useLiveQuery((q) => q.from({ todo: todos }));
 
 // with a filter
-const done = useQuery(todos, {
-  where: { completed: { eq: true } },
-  orderBy: { created_at: "desc" },
-  limit: 10,
-});
+const done = useLiveQuery((q) =>
+  q
+    .from({ todo: todos })
+    .where(({ todo }) => eq(todo.completed, true))
+    .orderBy(({ todo }) => todo.created_at, "desc")
+    .limit(10)
+);
 ```
 
 ### Joins
@@ -62,15 +63,13 @@ const done = useQuery(todos, {
 TanStack/db supports live joins across collections:
 
 ```ts
-const postsWithAuthor = useQuery(posts, {
-  with: {
-    author: {
-      collection: users,
-      field: "author_id",
-      references: "id",
-    },
-  },
-});
+import { useLiveQuery, eq } from "supa-tdb-collection";
+
+const postsWithAuthor = useLiveQuery((q) =>
+  q
+    .from({ post: posts })
+    .join({ author: users }, ({ post, author }) => eq(post.author_id, author.id))
+);
 // postsWithAuthor[0].author.name
 ```
 
@@ -93,6 +92,32 @@ todos.delete(todo);
 ```
 
 Mutations are **optimistic** — the local collection updates immediately and syncs to Supabase in the background. If the server rejects a change it rolls back automatically.
+
+### One-shot queries
+
+Use `queryOnce` when you need a non-reactive, single fetch — for example in server components, API routes, or form submissions where live updates aren't needed.
+
+```ts
+import { queryOnce, eq } from "supa-tdb-collection";
+
+// fetch all matching rows
+const completedTodos = await queryOnce(
+  (q) => q.from({ todo: todos }).where(({ todo }) => eq(todo.completed, true)),
+  supabase
+);
+
+// fetch a single row
+const todo = await queryOnce(
+  (q) =>
+    q
+      .from({ todo: todos })
+      .where(({ todo }) => eq(todo.id, todoId))
+      .findOne(),
+  supabase
+);
+```
+
+Unlike `useLiveQuery`, `queryOnce` does not subscribe to changes — it issues one request and resolves with the result.
 
 ### What gets pushed to PostgREST
 
@@ -118,8 +143,8 @@ These operations always fetch the full table (`select=*`) and are evaluated in-m
 ### Limitations and future development
 
 - All columns are fetched for every row — specific column selection can't be pushed to PostgREST
-- Client-side operations (`GROUP BY`, aggregates, computed `SELECT`) fetches the all rows needed for the operation, which can be expensive on large datasets. When the query uses `WHERE`, it fetches only the filtered rows.
-  - even if there's query-pushdown for these operations, it would be limited to a single collection - can't be done across joins.
+- `GROUP BY`, aggregates, and computed `SELECT` expressions are evaluated client-side. All rows needed for the operation are fetched — `WHERE` filters are still pushed to PostgREST, so only filtered rows are transferred. These operations are inherently limited to a single collection and cannot be pushed across joins.
+  - Exception: aggregate functions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`) are pushed to PostgREST when using `queryOnce`.
 - `OR` conditions and nested `AND`/`OR` are not yet supported by this library (but doable)
 - `OFFSET` is not yet supported (pagination must use `LIMIT` only for now), bug in Tanstack DB
 - `findOne` fetches the whole table, doesn't use `LIMIT=1`, bug in Tanstack DB
