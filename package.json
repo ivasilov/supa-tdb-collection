@@ -1,7 +1,7 @@
 {
   "name": "supa-tdb-collection",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A library for creating a Supabase collection.",
   "author": "Ivan Vasilov",
   "license": "MIT",
@@ -48,10 +48,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ivasilov/supabase-collection.git"
+    "url": "git+https://github.com/ivasilov/supa-tdb-collection.git"
   },
   "bugs": {
-    "url": "https://github.com/ivasilov/supabase-collection/issues"
+    "url": "https://github.com/ivasilov/supa-tdb-collection/issues"
   },
-  "homepage": "https://github.com/ivasilov/supabase-collection#readme"
+  "homepage": "https://github.com/ivasilov/supa-tdb-collection#readme"
 }
