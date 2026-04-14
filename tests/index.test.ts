@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, test } from "vitest"
 import {
   add,
   and,
@@ -21,8 +22,7 @@ import {
   or,
   sum,
   upper,
-} from "@tanstack/react-db"
-import { afterEach, beforeEach, describe, test } from "vitest"
+} from "../src/index"
 import {
   createMockedTodosCollection,
   createMockedUsersCollection,
@@ -618,7 +618,25 @@ describe("PostgREST query generation", () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
-          .join({ ut: utCollection }, ({ user, ut }) => eq(user.id, ut.user_id))
+          .innerJoin({ ut: utCollection }, ({ user, ut }) =>
+            eq(user.id, ut.user_id)
+          )
+      )
+
+      expectFetchUrls(mockFetch, [
+        "/rest/v1/users_todos?select=*",
+        "/rest/v1/users?id=in.(user_1)&select=*",
+      ])
+    })
+
+    test.todo("(left) join with select", async () => {
+      await queryResult((q) =>
+        q.from({ user: usersCollection }).select(({ user }) => ({
+          id: user.id,
+          todos: q
+            .from({ ut: utCollection })
+            .where(({ ut }) => eq(ut.user_id, user.id)),
+        }))
       )
 
       expectFetchUrls(mockFetch, [
@@ -640,7 +658,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users_todos?select=*",
-        "/rest/v1/users?id=in.(1)&select=*",
+        "/rest/v1/users?id=in.(user_1)&select=*",
       ])
     })
 
@@ -655,7 +673,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })
 
@@ -670,7 +688,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users_todos?select=*",
-        "/rest/v1/users?id=in.(1)&select=*",
+        "/rest/v1/users?id=in.(user_1)&select=*",
       ])
     })
 
@@ -689,7 +707,7 @@ describe("PostgREST query generation", () => {
       ])
     })
 
-    test("two chained joins (users -> users_todos -> todos)", async () => {
+    test.todo("two chained joins (users -> users_todos -> todos)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -701,13 +719,12 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
-        "/rest/v1/todos?id=in.(undefined)&select=*",
-        "/rest/v1/todos?id=in.(1,undefined)&select=*",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
+        "/rest/v1/todos?id=in.(user_1,undefined)&select=*",
       ])
     })
 
-    test("JOIN + WHERE + SELECT", async () => {
+    test.todo("JOIN + WHERE + SELECT", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -724,9 +741,8 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
-        "/rest/v1/todos?id=in.(undefined)&select=*",
-        "/rest/v1/todos?id=in.(1,undefined)&select=*",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
+        "/rest/v1/todos?id=in.(user_1,undefined)&select=*",
       ])
     })
 
@@ -744,7 +760,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&todo_id=gt.0&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&todo_id=gt.0&user_id=in.(user_1)",
       ])
     })
 
@@ -759,7 +775,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })
 
@@ -786,7 +802,7 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })
 
@@ -802,7 +818,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })
   })

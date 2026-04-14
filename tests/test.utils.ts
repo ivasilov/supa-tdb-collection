@@ -1,11 +1,11 @@
 import { createClient } from "@supabase/supabase-js"
+import { expect, vi } from "vitest"
+import { z } from "zod"
 import {
   createCollection,
   liveQueryCollectionOptions,
-} from "@tanstack/react-db"
-import { expect, vi } from "vitest"
-import { z } from "zod"
-import { supabaseCollectionOptions } from "../src/db"
+  supabaseCollectionOptions,
+} from "../src/index"
 
 // --- Schemas ---
 
@@ -34,11 +34,13 @@ export const SUPABASE_URL = "http://localhost:54321"
 export const SUPABASE_KEY = "test-key"
 
 export const mockResponses: Record<string, any[]> = {
-  users: [{ id: 1, name: "Alice", email: "alice@test.com", active: true }],
-  users_todos: [{ user_id: 1, todo_id: 1 }],
+  users: [
+    { id: "user_1", name: "Alice", email: "alice@test.com", active: true },
+  ],
+  users_todos: [{ user_id: "user_1", todo_id: "todo_1" }],
   todos: [
     {
-      id: 1,
+      id: "todo_1",
       title: "Buy milk",
       description: "From the store",
       completed: false,
@@ -108,8 +110,9 @@ export function createMockedTodosCollection(mockFetch: typeof fetch) {
 export async function queryResult(
   queryFn: Parameters<typeof liveQueryCollectionOptions>[0]["query"]
 ) {
+  const opts = liveQueryCollectionOptions({ query: queryFn })
   const collection = createCollection(
-    liveQueryCollectionOptions({ query: queryFn })
+    opts as Extract<typeof opts, { singleResult?: never }>
   )
   await collection.preload()
   const data = await collection.toArrayWhenReady()
