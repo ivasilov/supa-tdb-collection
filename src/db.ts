@@ -4,7 +4,7 @@ import type { PostgrestFilterBuilder } from "@supabase/postgrest-js"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import type { QueryClient } from "@tanstack/query-core"
 import { queryCollectionOptions } from "@tanstack/query-db-collection"
-import type { Collection } from "@tanstack/react-db"
+import { BasicIndex, type Collection } from "@tanstack/react-db"
 import {
   subsetOptionsToQueryKey,
   supabaseOnDelete,
@@ -127,6 +127,7 @@ export const supabaseCollectionOptions = <
     entry = registerTable(queryClient, tableName, supabase)
   }
   const config = queryCollectionOptions({
+    id: tableName,
     queryClient,
     getKey,
     schema,
@@ -136,6 +137,8 @@ export const supabaseCollectionOptions = <
     onInsert: (ctx) => supabaseOnInsert(supabase, tableName, ctx),
     onUpdate: (ctx) => supabaseOnUpdate(supabase, tableName, where, ctx),
     onDelete: (ctx) => supabaseOnDelete(supabase, tableName, where, ctx),
+    autoIndex: "eager",
+    defaultIndexType: BasicIndex,
   })
 
   const originalSync = config.sync.sync

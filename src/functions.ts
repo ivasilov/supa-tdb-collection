@@ -42,40 +42,65 @@ export const subsetOptionsToQueryKey = (
   tableName: string,
   ctx: LoadSubsetOptions
 ) => {
-  const filters =
-    parseWhereExpression(ctx.where, {
-      handlers: {
-        eq: (field, value) => {
-          return `${field.join(".")}=eq.${value}`
-        },
-        or: (field, value) => {
-          return `or(${field},${value})`
-        },
-        isNull: (field) => `${field.join(".")}=is.null`,
-        in: (field, value) => {
-          const uniqueValues = Array.from(new Set(value))
-          return `${field.join(".")}=in.${uniqueValues}`
-        },
-        and: (...filters) => {
-          return `${filters.map((filter) => filter).join("&")}`
-        },
+  const filters = parseWhereExpression(ctx.where, {
+    handlers: {
+      eq: (field, value) => {
+        return `${field.join(".")}=eq.${value}`
       },
-      onUnknownOperator: (operator, args) => {
-        console.warn(`Unsupported operator: ${operator}`)
-        return null
+      or: (field, value) => {
+        return `or(${field},${value})`
       },
-    }) || []
+      isNull: (field) => `${field.join(".")}=is.null`,
+      in: (field, value) => {
+        const uniqueValues = Array.from(new Set(value))
+        return `${field.join(".")}=in.${uniqueValues}`
+      },
+      and: (...filters) => {
+        return `${filters.map((filter) => filter).join("&")}`
+      },
+      gt: (field, value) => {
+        return `${field.join(".")}=gt.${value}`
+      },
+      gte: (field, value) => {
+        return `${field.join(".")}=gte.${value}`
+      },
+      lt: (field, value) => {
+        return `${field.join(".")}=lt.${value}`
+      },
+      lte: (field, value) => {
+        return `${field.join(".")}=lte.${value}`
+      },
+      not: (field, operator, value) => {
+        return field
+      },
+    },
+    onUnknownOperator: (operator, args) => {
+      console.warn(`Unsupported operator: ${operator}`)
+      return null
+    },
+  })
 
   const sorts = parseOrderByExpression(ctx.orderBy)
   const limit = ctx.limit
 
-  const a = [
-    tableName,
-    filters,
-    sorts.map((sort) => `${sort.field.join(".")}:${sort.direction}`),
-    limit,
-  ]
-  return a
+  const options: Record<string, string> = {}
+  if (filters) {
+    options["filters"] = filters
+  }
+  if (sorts.length > 0) {
+    options["sorts"] = sorts
+      .map((sort) => `${sort.field.join(".")}:${sort.direction}`)
+      .join(",")
+  }
+  if (limit) {
+    options["limit"] = limit.toString()
+  }
+
+  const result: any[] = [tableName]
+  if (Object.keys(options).length > 0) {
+    result.push(options)
+  }
+  return result
 }
 
 export const supabaseQueryFn = async (
