@@ -14,22 +14,15 @@ import {
 } from "./functions"
 import { getQueryClient } from "./query-client"
 
-type GenericPostgrestFilterBuilder = PostgrestFilterBuilder<
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
->
+type GenericPostgrestFilterBuilder = PostgrestFilterBuilder<any, any, any, any>
 
-interface SupabaseCollectionOptions<
-  TSchema extends StandardSchemaV1,
-  TKey extends string | number,
-> {
-  /** The function to extract the key from the item, used for storing the item in the collection */
-  getKey: (item: StandardSchemaV1.InferOutput<TSchema>) => TKey
+interface SupabaseCollectionOptions<TSchema extends StandardSchemaV1> {
+  /**
+   * The columns that uniquely identify a row. Used to extract the key for
+   * storing the item in the collection and to build the where clause for
+   * update and delete operations.
+   */
+  keys: Array<keyof StandardSchemaV1.InferOutput<TSchema> & string>
   /** The query client */
   queryClient?: QueryClient
   /** Whether to receive updates when a record has been inserted, updated, or deleted by another user */
@@ -40,11 +33,6 @@ interface SupabaseCollectionOptions<
   supabase: SupabaseClient
   /** The name of the table in the database */
   tableName: string
-  /** The function to build the where clause for the postgrest-js query, used for update and delete operations */
-  where: (
-    query: GenericPostgrestFilterBuilder,
-    item: StandardSchemaV1.InferOutput<TSchema>
-  ) => GenericPostgrestFilterBuilder
 }
 
 interface TableEntry {
@@ -107,20 +95,37 @@ const registerTable = (
   return tables.get(tableName)!
 }
 
-export const supabaseCollectionOptions = <
-  TSchema extends StandardSchemaV1,
-  TKey extends string | number,
->({
+export const supabaseCollectionOptions = <TSchema extends StandardSchemaV1>({
   tableName,
-  getKey,
-  where,
+  keys,
   schema,
   queryClient,
   supabase,
   realtime,
-}: SupabaseCollectionOptions<TSchema, TKey>) => {
+}: SupabaseCollectionOptions<TSchema>) => {
   // if the query client is not provided, use the global query client
   queryClient = queryClient ?? getQueryClient()
+
+  type TItem = StandardSchemaV1.InferOutput<TSchema>
+
+  // Derive the collection key from the configured key columns. A single key
+  // column is used as-is, while composite keys are joined into a string.
+  const getKey = (item: TItem): string | number => {
+    return keys.map((key) => item[key]).join("-")
+  }
+
+  // Build the where clause for update and delete operations by matching every
+  // configured key column against the item's values.
+  const where = (
+    query: GenericPostgrestFilterBuilder,
+    item: TItem
+  ): GenericPostgrestFilterBuilder => {
+    let scopedQuery = query
+    for (const key of keys) {
+      scopedQuery = scopedQuery.eq(key as string, item[key])
+    }
+    return scopedQuery
+  }
 
   let entry: TableEntry | null = null
   if (realtime) {

@@ -66,8 +66,7 @@ export function createMockedUsersCollection(mockFetch: typeof fetch) {
   return createCollection(
     supabaseCollectionOptions({
       tableName: "users",
-      getKey: (item) => item.id,
-      where: (query, item) => query.eq("id", item.id),
+      keys: ["id"],
       schema: usersSchema,
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },
@@ -80,9 +79,7 @@ export function createMockedUsersTodosCollection(mockFetch: typeof fetch) {
   return createCollection(
     supabaseCollectionOptions({
       tableName: "users_todos",
-      getKey: (item) => `${item.user_id}_${item.todo_id}`,
-      where: (query, item) =>
-        query.eq("user_id", item.user_id).eq("todo_id", item.todo_id),
+      keys: ["user_id", "todo_id"],
       schema: usersTodosSchema,
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },
@@ -95,8 +92,7 @@ export function createMockedTodosCollection(mockFetch: typeof fetch) {
   return createCollection(
     supabaseCollectionOptions({
       tableName: "todos",
-      getKey: (item) => item.id,
-      where: (query, item) => query.eq("id", item.id),
+      keys: ["id"],
       schema: todosSchema,
       supabase: createClient(SUPABASE_URL, SUPABASE_KEY, {
         global: { fetch: mockFetch },

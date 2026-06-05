@@ -32,8 +32,7 @@ const todos = createCollection(
   supabaseCollectionOptions({
     tableName: "todos",
     schema: todoSchema, // any Standard Schema (zod, valibot, …)
-    getKey: (todo) => todo.id,
-    where: (query, item) => query.eq("id", item.id),
+    keys: ["id"], // column(s) that uniquely identify a row
     supabase,
     realtime: true,
   }),
