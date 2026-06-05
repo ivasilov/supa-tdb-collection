@@ -1,4 +1,4 @@
-# supabase-collection
+# supa-tdb-collection
 
 A [TanStack/db](https://tanstack.com/db/latest) collection backed by [Supabase](https://supabase.com/). It wires up Supabase PostgREST queries, mutations, and real-time subscriptions so you get a reactive state that stays in sync with your Postgres database.
 
@@ -6,7 +6,7 @@ A [TanStack/db](https://tanstack.com/db/latest) collection backed by [Supabase](
 
 1. Go to the block installer:
 
-   <https://ui-library-git-feat-tanstack-db-gen-supabase.vercel.app/ui/docs/nextjs/tanstack-db>
+   <https://supabase.com/ui/docs/nextjs/tanstack-db>
 
 2. Enter your Supabase project URL and anon key (from an existing **production** project)
 
