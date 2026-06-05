@@ -629,7 +629,7 @@ describe("PostgREST query generation", () => {
       ])
     })
 
-    test.todo("(left) join with select", async () => {
+    test("(left) join with select", async () => {
       await queryResult((q) =>
         q.from({ user: usersCollection }).select(({ user }) => ({
           id: user.id,
@@ -641,7 +641,7 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*&user_id=in.(1)",
+        "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })
 
@@ -707,7 +707,7 @@ describe("PostgREST query generation", () => {
       ])
     })
 
-    test.todo("two chained joins (users -> users_todos -> todos)", async () => {
+    test("two chained joins (users -> users_todos -> todos)", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -720,11 +720,11 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
-        "/rest/v1/todos?id=in.(user_1,undefined)&select=*",
+        "/rest/v1/todos?id=in.(todo_1)&select=*",
       ])
     })
 
-    test.todo("JOIN + WHERE + SELECT", async () => {
+    test("JOIN + WHERE + SELECT", async () => {
       await queryResult((q) =>
         q
           .from({ user: usersCollection })
@@ -742,7 +742,7 @@ describe("PostgREST query generation", () => {
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
-        "/rest/v1/todos?id=in.(user_1,undefined)&select=*",
+        "/rest/v1/todos?id=in.(todo_1)&select=*",
       ])
     })
 
@@ -801,7 +801,6 @@ describe("PostgREST query generation", () => {
 
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
-        "/rest/v1/users_todos?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
       ])
     })

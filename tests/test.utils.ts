@@ -129,5 +129,5 @@ export function expectFetchUrls(
   const expected = expectedPaths.map((p) =>
     normalizeFetchUrl(new URL(p, SUPABASE_URL))
   )
-  expect([...expected]).toEqual([...actual])
+  expect([...actual]).toEqual([...expected])
 }

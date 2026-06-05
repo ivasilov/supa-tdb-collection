@@ -26,11 +26,11 @@
   },
   "dependencies": {
     "@standard-schema/spec": "^1.1.0",
-    "@supabase/postgrest-js": "^2.91.0",
-    "@supabase/supabase-js": "^2.93.3",
-    "@tanstack/db": "^0.6.5",
-    "@tanstack/query-core": "^5.99.0",
-    "@tanstack/query-db-collection": "^1.0.36"
+    "@supabase/postgrest-js": "^2.107.0",
+    "@supabase/supabase-js": "^2.107.0",
+    "@tanstack/db": "^0.6.7",
+    "@tanstack/query-core": "^5.101.0",
+    "@tanstack/query-db-collection": "^1.0.38"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.7",

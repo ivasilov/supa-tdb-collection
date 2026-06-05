@@ -843,7 +843,7 @@ describe("queryOnce PostgREST query generation", () => {
       ])
     })
 
-    test.todo("(left) join with select", async () => {
+    test("(left) join with select", async () => {
       await queryOnce(
         (q) =>
           q.from({ user: usersCollection }).select(({ user }) => ({
@@ -860,7 +860,7 @@ describe("queryOnce PostgREST query generation", () => {
       ])
     })
 
-    test.todo("two chained joins (users -> users_todos -> todos)", async () => {
+    test("two chained joins (users -> users_todos -> todos)", async () => {
       await queryOnce(
         (q) =>
           q
@@ -876,7 +876,7 @@ describe("queryOnce PostgREST query generation", () => {
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
-        "/rest/v1/todos?id=in.(todo_1,undefined)&select=*",
+        "/rest/v1/todos?id=in.(todo_1)&select=*",
       ])
     })
 
@@ -897,7 +897,7 @@ describe("queryOnce PostgREST query generation", () => {
       ])
     })
 
-    test.todo("JOIN + WHERE + SELECT + ORDER BY", async () => {
+    test("JOIN + WHERE + SELECT + ORDER BY", async () => {
       await queryOnce(
         (q) =>
           q
@@ -919,7 +919,7 @@ describe("queryOnce PostgREST query generation", () => {
       expectFetchUrls(mockFetch, [
         "/rest/v1/users?order=name.asc&select=*",
         "/rest/v1/users_todos?select=*&user_id=in.(user_1)",
-        "/rest/v1/todos?id=in.(todo_1,undefined)&select=*",
+        "/rest/v1/todos?id=in.(todo_1)&select=*",
       ])
     })
 
