@@ -195,9 +195,27 @@ function serializeWhere(where: IR.Where): SerializedWhere {
   return serializeExpression(where)
 }
 
+/** A `...row` spread leaves an uncompiled ref proxy in the select IR */
+function isRefProxy(value: unknown): value is { __path: Array<string> } {
+  return (
+    typeof value === `object` &&
+    value !== null &&
+    (value as { __refProxy?: boolean }).__refProxy === true
+  )
+}
+
 function serializeSelect(select: IR.Select): SerializedSelect {
   const result: SerializedSelect = {}
   for (const [alias, value] of Object.entries(select)) {
+    // A spread (`...row`) is keyed by a `__SPREAD_SENTINEL__` alias and its
+    // value is a raw ref proxy rather than a compiled expression. Recursing
+    // into it would access proxy props endlessly, so serialize it as a plain
+    // ref and let consumers decide how to handle it (PostgREST falls back to
+    // `select=*`).
+    if (isRefProxy(value)) {
+      result[alias] = { type: `ref`, path: [...value.__path] }
+      continue
+    }
     if (
       value &&
       typeof value === `object` &&

@@ -461,7 +461,7 @@ describe("queryOnce PostgREST query generation", () => {
       expectFetchUrls(mockFetch, ["/rest/v1/users?select=*&active=eq.true"])
     })
 
-    test.only("GROUP BY + aggregates falls back to *", async () => {
+    test("GROUP BY + aggregates falls back to *", async () => {
       await queryOnce(
         (q) =>
           q

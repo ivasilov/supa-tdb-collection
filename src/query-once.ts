@@ -129,6 +129,8 @@ function processSelectEntries(select: SerializedSelect): string[] | null {
   const parts: string[] = []
 
   for (const [alias, value] of Object.entries(select)) {
+    // A spread (`...row`) can't be expressed as a fixed column list
+    if (alias.startsWith("__SPREAD_SENTINEL__")) return null
     if (value && typeof value === "object" && "type" in value) {
       const part = exprToSelectPart(alias, value as SerializedExpression)
       if (part === null) return null
