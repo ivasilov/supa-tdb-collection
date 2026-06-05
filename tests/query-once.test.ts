@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js"
-import { afterEach, beforeEach, describe, test } from "vitest"
 import {
   add,
   and,
@@ -20,10 +19,11 @@ import {
   min,
   not,
   or,
-  queryOnce,
   sum,
   upper,
-} from "../src/index"
+} from "@tanstack/db"
+import { afterEach, beforeEach, describe, test } from "vitest"
+import { queryOnce } from "../src/index"
 import {
   createMockedTodosCollection,
   createMockedUsersCollection,

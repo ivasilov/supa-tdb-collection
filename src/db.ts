@@ -2,9 +2,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec"
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js"
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { BasicIndex, type Collection } from "@tanstack/db"
 import type { QueryClient } from "@tanstack/query-core"
 import { queryCollectionOptions } from "@tanstack/query-db-collection"
-import { BasicIndex, type Collection } from "@tanstack/react-db"
 import {
   subsetOptionsToQueryKey,
   supabaseOnDelete,

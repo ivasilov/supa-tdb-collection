@@ -1,6 +1,5 @@
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js"
 import type { SupabaseClient } from "@supabase/supabase-js"
-import type { QueryClient, QueryMeta } from "@tanstack/query-core"
 import {
   type DeleteMutationFnParams,
   extractSimpleComparisons,
@@ -11,7 +10,8 @@ import {
   parseWhereExpression,
   type SimpleComparison,
   type UpdateMutationFnParams,
-} from "@tanstack/react-db"
+} from "@tanstack/db"
+import type { QueryClient, QueryMeta } from "@tanstack/query-core"
 
 const buildQuery = (
   baseQuery: PostgrestFilterBuilder<any, any, any, any, any, any, any>,

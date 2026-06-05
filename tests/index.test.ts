@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, test } from "vitest"
 import {
   add,
   and,
@@ -22,7 +21,8 @@ import {
   or,
   sum,
   upper,
-} from "../src/index"
+} from "@tanstack/db"
+import { afterEach, beforeEach, describe, test } from "vitest"
 import {
   createMockedTodosCollection,
   createMockedUsersCollection,

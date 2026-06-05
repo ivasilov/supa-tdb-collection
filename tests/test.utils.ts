@@ -1,11 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
+import { createCollection, liveQueryCollectionOptions } from "@tanstack/db"
 import { expect, vi } from "vitest"
 import { z } from "zod"
-import {
-  createCollection,
-  liveQueryCollectionOptions,
-  supabaseCollectionOptions,
-} from "../src/index"
+import { supabaseCollectionOptions } from "../src/index"
 
 // --- Schemas ---
 
